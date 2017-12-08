@@ -1,0 +1,83 @@
+version: "2.1"
+services:
+  lb:
+    depends_on:
+      - queuer
+    image: eeacms/haproxy
+    ports:
+      - "80:5000"
+      - "1936:1936"
+    environment:
+      BACKENDS: "queuer"
+      DNS_ENABLED: "true"
+    restart: always
+  queuer:
+    image: creep/queuer
+    links:
+      - redis
+      - logger
+    environment:
+      - AMQP_URL=amqp://mqadmin:mqadmin@dev-rabbit-1.lan.smclinic.ru:5672//
+      - EXPIRE_TIME=120
+    restart: always
+  redis-cleaner:
+    image: creep/redis-cleaner
+    links:
+      - redis
+    environment:
+      - AMQP_URL=amqp://mqadmin:mqadmin@dev-rabbit-1.lan.smclinic.ru:5672//
+    restart: always
+  redis:
+    image: creep/redis
+    ports:
+      - "6379"
+    volumes_from:
+      - redisdata
+    restart: always
+  redisdata:
+    image: tianon/true
+    volumes:
+      - /data/redisdb
+  director:
+    image: creep/director
+    environment:
+      - AMQP_URL=amqp://mqadmin:mqadmin@dev-rabbit-1.lan.smclinic.ru:5672//
+      - SYSTEM_ID=foo
+    links:
+      - mongo
+      - action-scripter
+      - splitter
+      - logger
+    depends_on:
+      mongo:
+        condition: service_healthy
+  logger:
+    image: creep/logger
+    links:
+      - mongo
+    depends_on:
+      mongo:
+        condition: service_healthy
+  action-scripter:
+    image: creep/action-scripter
+    ports:
+      - "8081"
+  splitter:
+    image: creep/splitter
+    ports:
+      - "8082"
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo localhost:27017 --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes_from:
+      - mongodata
+  mongodata:
+    image: tianon/true
+    volumes:
+      - /data/db
