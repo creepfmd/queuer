@@ -56,12 +56,12 @@ globals.startFunction = function () {
     })
     console.log('[AMQP] connected')
     globals.amqpConn = conn
-    globals.redisClient = redis.createClient('redis://redis')
+    globals.redisClient = redis.createClient(process.env.REDIS_URL)
     globals.redisClient.on('error', function (err) {
       console.log('[REDIS] ' + err)
     })
 
-    mongoose.connect('mongodb://mongo:27017/local', function (err) {
+    mongoose.connect(process.env.MONGO_URL, function (err) {
       if (err) {
         console.error('[mongo]', err.message)
       }
