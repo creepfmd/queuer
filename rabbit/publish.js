@@ -10,7 +10,7 @@ module.exports = function (exchange, routingKey, content, messageId, callback) {
         if (err !== null) {
           console.error('[AMQP] publish', err)
         } else {
-          globals.pubChannel.publish(exchange, routingKey, Buffer.from(content), { persistent: true, correlationId: messageId },
+          globals.pubChannel.publish(exchange, routingKey, Buffer.from(content), { persistent: true, correlationId: messageId, timestamp: Date.now() },
                           function (err, ok) {
                             if (err !== null) {
                               console.error('[AMQP] publish', err)

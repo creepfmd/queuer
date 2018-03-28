@@ -6,25 +6,20 @@ var router = express.Router()
 router.get('/ack/:messageId', function (req, res) {
   globals.redisClient.hgetall(req.params.messageId, function (err, reply) {
     if (err) {
-      console.log(err)
+      console.error(err)
       res.status(500).json({ error: err.message })
     }
     if (reply) {
       globals.systemCollection.findOne({ systemId: reply.queue.replace('.outgoing', ''), publishToken: req.token }, function (err, result) {
         if (err) {
-          console.log(err)
+          console.error(err)
           res.status(500).json({ error: err.message })
         }
         if (result) {
           console.log({ message: 'Message acked ' + req.params.messageId })
           globals.redisClient.multi()
-            .hdel(req.params.messageId, 'message')
-            .hdel(req.params.messageId, 'queue')
-            .hdel(req.params.messageId, 'correlationId')
-            .hdel(req.params.messageId, 'consumeTime')
-            .hdel(req.params.messageId + '_clone', 'message')
-            .hdel(req.params.messageId + '_clone', 'queue')
-            .hdel(req.params.messageId + '_clone', 'correlationId')
+            .del(req.params.messageId)
+            .del(req.params.messageId + '_clone')
             .exec(function (err, replies) {
               if (err) {
                 res.status(500).json({ error: err.message })

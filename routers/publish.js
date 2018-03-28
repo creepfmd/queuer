@@ -2,7 +2,9 @@ var express = require('express')
 var globals = require('../include/globals.js')
 var logger = require('../include/logger.js')
 var rabbit = require('../include/rabbit.js')
-const uuidv4 = require('uuid/v1')
+const uuidv5 = require('uuid/v5')
+const uuidv4 = require('uuid/v4')
+const uuidv1 = require('uuid/v1')
 var router = express.Router()
 
 router.post('/publish/:systemId/:key', function (req, res) {
@@ -11,7 +13,7 @@ router.post('/publish/:systemId/:key', function (req, res) {
       res.status(500).json({ error: err.message })
     }
     if (result) {
-      const newMessageUid = uuidv4()
+      const newMessageUid = uuidv5(uuidv4(), uuidv1())
       logger.logNewMessage(newMessageUid, req.params.systemId)
       rabbit.publish(req.params.systemId, req.params.key, req.text, newMessageUid, function () {
         logger.logQueued(newMessageUid)

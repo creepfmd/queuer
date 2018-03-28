@@ -15,10 +15,13 @@ services:
     image: creep/queuer
     links:
       - redis
+      - mongo
       - logger
     environment:
       - AMQP_URL=amqp://mqadmin:mqadmin@dev-rabbit-1.lan.smclinic.ru:5672//
       - EXPIRE_TIME=120
+      - MONGO_URL=mongodb://mongo:27017/local
+      - REDIS_URL=redis://redis
     restart: always
   redis-cleaner:
     image: creep/redis-cleaner
@@ -42,6 +45,10 @@ services:
     image: creep/director
     environment:
       - AMQP_URL=amqp://mqadmin:mqadmin@dev-rabbit-1.lan.smclinic.ru:5672//
+      - ACTION_SCRIPTER_URL=http://action-scripter:8081/webhook/
+      - SPLITTER_URL=http://splitter:8082/
+      - MONGO_URL=mongodb://mongo:27017/local
+      - REDIS_URL=redis://redis
       - SYSTEM_ID=foo
     links:
       - mongo
@@ -55,6 +62,8 @@ services:
     image: creep/logger
     links:
       - mongo
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/local
     depends_on:
       mongo:
         condition: service_healthy

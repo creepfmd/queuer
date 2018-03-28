@@ -4,6 +4,7 @@ var publishRouter = require('./routers/publish.js')
 var consumeRouter = require('./routers/consume.js')
 var ackRouter = require('./routers/ack.js')
 var nackRouter = require('./routers/nack.js')
+var configRouter = require('./routers/getConfig.js')
 const bearerToken = require('express-bearer-token')
 var mongoose = require('mongoose')
 var amqp = require('amqplib/callback_api')
@@ -33,12 +34,14 @@ app.use(publishRouter)
 app.use(consumeRouter)
 app.use(ackRouter)
 app.use(nackRouter)
+app.use(configRouter)
 
 globals.startFunction = function () {
   globals.amqpConn = null
   globals.pubChannel = null
   globals.redisClient = null
 
+  console.log('Connecting amqp')
   amqp.connect(process.env.AMQP_URL + '?heartbeat=60', function (err, conn) {
     if (err) {
       console.error('[AMQP]', err.message)
@@ -56,16 +59,19 @@ globals.startFunction = function () {
     })
     console.log('[AMQP] connected')
     globals.amqpConn = conn
+    console.log('Connecting redis')
     globals.redisClient = redis.createClient(process.env.REDIS_URL)
     globals.redisClient.on('error', function (err) {
       console.log('[REDIS] ' + err)
+      return setTimeout(globals.startFunction, 500)
     })
-
+    console.log('Connecting mongo')
     mongoose.connect(process.env.MONGO_URL, function (err) {
       if (err) {
         console.error('[mongo]', err.message)
+        return setTimeout(globals.startFunction, 500)
       }
-
+      console.log('Mongo connected')
       globals.systemCollection = mongoose.connection.db.collection('systems')
     })
     if (globals.server == null) {
