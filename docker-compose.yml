@@ -18,7 +18,7 @@ services:
       - mongo
       - logger
     environment:
-      - AMQP_URL=amqp://mqadmin:mqadmin@dev-rabbit-1.lan.smclinic.ru:5672//
+      - AMQP_URL=amqp://mqadmin:mqadmin@dev-rabbit-1.rutt.io:5672//
       - EXPIRE_TIME=120
       - MONGO_URL=mongodb://mongo:27017/local
       - REDIS_URL=redis://redis
@@ -28,7 +28,7 @@ services:
     links:
       - redis
     environment:
-      - AMQP_URL=amqp://mqadmin:mqadmin@dev-rabbit-1.lan.smclinic.ru:5672//
+      - AMQP_URL=amqp://mqadmin:mqadmin@dev-rabbit-1.rutt.io:5672//
     restart: always
   redis:
     image: creep/redis
@@ -44,7 +44,7 @@ services:
   director:
     image: creep/director
     environment:
-      - AMQP_URL=amqp://mqadmin:mqadmin@dev-rabbit-1.lan.smclinic.ru:5672//
+      - AMQP_URL=amqp://mqadmin:mqadmin@dev-rabbit-1.rutt.io:5672//
       - ACTION_SCRIPTER_URL=http://action-scripter:8081/webhook/
       - SPLITTER_URL=http://splitter:8082/
       - MONGO_URL=mongodb://mongo:27017/local
