@@ -13,7 +13,7 @@
     "amqplib": "^0.5.1",
     "express": "^4.16.2",
     "express-bearer-token": "^2.1.0",
-    "mongoose": "^4.12.3",
+    "mongoose": "^5.7.7",
     "raw-body": "^2.3.2",
     "redis": "^2.8.0",
     "request": "^2.83.0",
